@@ -40,6 +40,7 @@ class Board extends React.Component {
 
   renderSquare(i) {
     return <Square
+      key={i}
       value={this.props.squares[i]}
       onClick={() => this.props.onClick(i)}
     />;
@@ -52,7 +53,7 @@ class Board extends React.Component {
     }
 
     return (
-      <div className="board-row">
+      <div key={i} className="board-row">
       { squares }
       </div>
     )
@@ -112,6 +113,18 @@ class Game extends React.Component {
     });
   }
 
+  jumpTo(step) {
+    const history = this.state.history.slice(0, step + 1); // purge history after step
+    const squares = history[step].squares;
+    const winner = findWinner(squares); // find winner (if exists on current state)
+    
+    this.setState({
+      history: history,
+      xIsNext: step % 2 === 0, // X plays on even moves
+      winner: winner,
+    });
+  }
+
   render() {
 
     const history = this.state.history;
@@ -124,6 +137,17 @@ class Game extends React.Component {
       status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
     }
 
+    const moves = history.map((step, index) => {
+      const desc = index ?
+        'Go to move #' + index :
+        'Go to game start';
+      return (
+        <li key={index}>
+          <button onClick={() => this.jumpTo(index)}>{desc}</button>
+        </li>
+      );
+    });
+
 
     return (
       <div className="game">
@@ -135,7 +159,7 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{ status }</div>
-          <ol>{/* TODO */}</ol>
+          <ol>{ moves }</ol>
         </div>
       </div>
     );
